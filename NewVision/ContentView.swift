@@ -8,9 +8,25 @@
 import SwiftUI
 import RealityKit
 import RealityKitContent
+import AVFoundation
 
 extension Color {
     static let customPurple = Color(red: 0.5, green: 0.0, blue: 0.5)
+}
+
+class AudioPlayerUtil {
+    var audioPlayer: AVAudioPlayer?
+
+    func playSound(soundName: String, soundType: String) {
+        if let path = Bundle.main.path(forResource: soundName, ofType: soundType) {
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: path))
+                audioPlayer?.play()
+            } catch {
+                print("Could not find and play the sound file.")
+            }
+        }
+    }
 }
 
 struct TitlePanelView: View {
@@ -116,10 +132,12 @@ struct AnimatedTextView: View {
         ("Sharon Tan", "Yes, please."),
     ]
 
-    let typingInterval: TimeInterval = 2.0 // Interval before typing starts
+    let baseTypingInterval: TimeInterval = 1.0 // Base interval before typing starts
+    let perCharacterInterval: TimeInterval = 0.10 // Interval added per character
     @Binding var animationCompleted: Bool
     let sendBubbleColor = Color.black.opacity(0.7)   // Dark bubble for sent messages
     let receiveBubbleColor = Color.gray.opacity(0.9) // Light bubble for received messages
+    var audioPlayer = AudioPlayerUtil()
 
     var body: some View {
         VStack {
@@ -159,18 +177,33 @@ struct AnimatedTextView: View {
     }
     
     func addMessages() {
+        var totalDelay: TimeInterval = 0
+
         for (index, message) in conversation.enumerated() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + typingInterval * Double(index)) {
+            let delay = baseTypingInterval + perCharacterInterval * Double(message.1.count)
+            DispatchQueue.main.asyncAfter(deadline: .now() + totalDelay) {
                 withAnimation {
                     messages.append(message)
-                    if index == conversation.count - 1 {
+                    if message.0 == "The Fates" {
+                        // Assuming you have a way to determine the appropriate file name for each message
+                        let fileName = determineAudioFileName(name:"sharon", index:index+1)
+                        audioPlayer.playSound(soundName: fileName, soundType: "mp3")
+                                        }
+                    if messages.count == conversation.count {
                         animationCompleted = true // Set to true when last message is added
                     }
                 }
             }
+            totalDelay += delay
         }
     }
+
+    private func determineAudioFileName(name: String, index: Int) -> String {
+        // Concatenate "sharon_" with the message index
+        return "\(name)_\(index)"
+    }
 }
+
 
 struct ContentView: View {
     @State private var sessionID: String?
