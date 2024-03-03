@@ -22,8 +22,8 @@ struct NewVisionApp: App {
             }
         }.windowStyle(.automatic)
 
-        //        ImmersiveSpace(id: "ImmersiveSpace") {
-        //            ImmersiveView()
-        //        }
+//        ImmersiveSpace(id: "ImmersiveSpace") {
+//            ImmersiveView()
+//        }
     }
 }

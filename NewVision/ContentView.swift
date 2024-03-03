@@ -41,17 +41,6 @@ struct ImagePanelView: View {
     }
 }
 
-//struct ImagePanelView: View {
-//    var imageName: String
-//
-//    var body: some View {
-//        Image(imageName)
-//            .resizable()
-//            .aspectRatio(contentMode: .fit)
-//            .frame(width: 800, height: 500)
-//    }
-//}
-
 struct ImageGalleryView: View {
     var imageNames: [String]
 
@@ -204,8 +193,7 @@ struct ContentView: View {
                 Divider().padding()
                 
                 AnimatedTextView()
-                
-                //ImagePanelView(imageName: "Sunset-Zahid")
+            
                 //ImageGalleryView(imageNames: ["Sunset-Zahid", "Sutro-Tower", "Waymo-burn"])
                 
 //                MixedContentGalleryView(contents: [
