@@ -172,20 +172,6 @@ struct AnimatedTextView: View {
     }
 }
 
-struct NextView: View {
-    var body: some View {
-        MixedContentGalleryView(contents: [
-            .image("Sunset-Zahid"),
-            .text("Pacifica Sunset in June."),
-            .image("Sutro-Tower"),
-            .text("A captivating story about Sutro Tower."),
-            .image("Waymo-burn"),
-            .text("Final thoughts on autonomous vehicles.")
-        ])
-
-    }
-}
-
 struct ContentView: View {
     @State private var sessionID: String?
     @State private var userID: String = "sharon"
@@ -193,7 +179,7 @@ struct ContentView: View {
     @State private var immersiveSpaceIsShown = false
     @State private var rotationAngle: Angle = Angle(degrees: 0)
     @State private var responseText: String = "Loading..."
-    @State private var showNextView = false
+    @State private var showGalleryView = false
     @State private var animationCompleted = false
 
     @Environment(\.openImmersiveSpace) var openImmersiveSpace
@@ -226,7 +212,7 @@ struct ContentView: View {
                 
                 if animationCompleted {
                     Button("Continue") {
-                        showNextView = true
+                        showGalleryView = true
                     }
                     .font(.headline)
                     .foregroundColor(.white)
@@ -234,8 +220,8 @@ struct ContentView: View {
                     .frame(width: 280, height: 50)
                     .cornerRadius(25)
                     
-                    .fullScreenCover(isPresented: $showNextView) {
-                        NextView()
+                    .fullScreenCover(isPresented: $showGalleryView) {
+                        GalleryView()
                     }
                 }
                 
