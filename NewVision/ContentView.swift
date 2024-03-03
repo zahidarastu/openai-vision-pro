@@ -8,10 +8,28 @@
 import SwiftUI
 import RealityKit
 import RealityKitContent
+import AVFoundation
+
 
 extension Color {
     static let customPurple = Color(red: 0.5, green: 0.0, blue: 0.5)
 }
+
+class AudioPlayerUtil {
+    var audioPlayer: AVAudioPlayer?
+
+    func playSound(soundName: String, soundType: String) {
+        if let path = Bundle.main.path(forResource: soundName, ofType: soundType) {
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: path))
+                audioPlayer?.play()
+            } catch {
+                print("Could not find and play the sound file.")
+            }
+        }
+    }
+}
+
 
 struct TitlePanelView: View {
     var body: some View {
@@ -114,6 +132,8 @@ struct ContentView: View {
 
     @Environment(\.openImmersiveSpace) var openImmersiveSpace
     @Environment(\.dismissImmersiveSpace) var dismissImmersiveSpace
+    
+    let audioPlayer = AudioPlayerUtil()
 
     let timer = Timer.publish(every: 1/60, on: .main, in: .common).autoconnect()
 
@@ -137,6 +157,12 @@ struct ContentView: View {
                 ])
 
                 //Divider().padding()
+                
+                Button(action: {
+                    self.audioPlayer.playSound(soundName: "yourSoundFileName", soundType: "mp3")
+                }) {
+                    Text("Play Sound")
+                }
                 
                 InteractivePanelView()
                 
