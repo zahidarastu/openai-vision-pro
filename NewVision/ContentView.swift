@@ -27,17 +27,30 @@ struct TitlePanelView: View {
     }
 }
 
-
 struct ImagePanelView: View {
     var imageName: String
+    var width: CGFloat // Add a variable for width
+    var height: CGFloat // Add a variable for height
 
     var body: some View {
         Image(imageName)
             .resizable()
+            //.scaledToFit()
             .aspectRatio(contentMode: .fit)
-            .frame(width: 800, height: 500)
+            .frame(width: width, height: height)
     }
 }
+
+//struct ImagePanelView: View {
+//    var imageName: String
+//
+//    var body: some View {
+//        Image(imageName)
+//            .resizable()
+//            .aspectRatio(contentMode: .fit)
+//            .frame(width: 800, height: 500)
+//    }
+//}
 
 struct ImageGalleryView: View {
     var imageNames: [String]

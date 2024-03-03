@@ -7,15 +7,23 @@
 
 import SwiftUI
 
+
 @main
 struct NewVisionApp: App {
+    // State to control the current view
+    @State private var isSessionStarted = false
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
-        }
+            if isSessionStarted {
+                ContentView()
+            } else {
+                StartSessionView(isSessionStarted: $isSessionStarted)
+            }
+        }.windowStyle(.automatic)
 
-        ImmersiveSpace(id: "ImmersiveSpace") {
-            ImmersiveView()
-        }
+        //        ImmersiveSpace(id: "ImmersiveSpace") {
+        //            ImmersiveView()
+        //        }
     }
 }
