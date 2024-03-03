@@ -132,8 +132,8 @@ struct AnimatedTextView: View {
         ("Sharon Tan", "Yes, please."),
     ]
 
-    let baseTypingInterval: TimeInterval = 1.0 // Base interval before typing starts
-    let perCharacterInterval: TimeInterval = 0.03 // Interval added per character
+    let baseTypingInterval: TimeInterval = 1.5 // Base interval before typing starts
+    let perCharacterInterval: TimeInterval = 0.04 // Interval added per character
     @Binding var animationCompleted: Bool
     let sendBubbleColor = Color.black.opacity(0.7)   // Dark bubble for sent messages
     let receiveBubbleColor = Color.gray.opacity(0.9) // Light bubble for received messages
