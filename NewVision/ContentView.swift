@@ -15,7 +15,7 @@ extension Color {
 
 struct TitlePanelView: View {
     var body: some View {
-        Text("Welcome to the Crossroads!")
+        Text("The Crossroads")
             .font(.largeTitle)
             .padding()
             .frame(maxWidth: 700)
@@ -129,7 +129,7 @@ struct ContentView: View {
                 //ImageGalleryView(imageNames: ["Sunset-Zahid", "Sutro-Tower", "Waymo-burn"])
                 MixedContentGalleryView(contents: [
                     .image("Sunset-Zahid"),
-                    .text("Here's some insightful text about the first image."),
+                    .text("Pacifica Sunset in June."),
                     .image("Sutro-Tower"),
                     .text("A captivating story about Sutro Tower."),
                     .image("Waymo-burn"),
@@ -161,6 +161,7 @@ struct ContentView: View {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 100
         
         // Add sessionID and userID to the request headers if they exist
         if let sessionID = self.sessionID {
@@ -168,7 +169,7 @@ struct ContentView: View {
         }
         request.addValue(userID, forHTTPHeaderField: "userID")
         
-        let body: [String: Any] = ["message": "whats up"]
+        let body: [String: Any] = ["message": "Should I got to San Francisco or New York?"]
         request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
 
         
