@@ -35,7 +35,6 @@ struct ImagePanelView: View {
     var body: some View {
         Image(imageName)
             .resizable()
-            //.scaledToFit()
             .aspectRatio(contentMode: .fit)
             .frame(width: width, height: height)
     }
@@ -117,7 +116,8 @@ struct AnimatedTextView: View {
         ("Sharon Tan", "Yes, please."),
     ]
 
-    let typingInterval: TimeInterval = 3.0 // Interval before typing starts
+    let typingInterval: TimeInterval = 2.0 // Interval before typing starts
+    @Binding var animationCompleted: Bool
     let sendBubbleColor = Color.black.opacity(0.7)   // Dark bubble for sent messages
     let receiveBubbleColor = Color.gray.opacity(0.9) // Light bubble for received messages
 
@@ -163,13 +163,28 @@ struct AnimatedTextView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + typingInterval * Double(index)) {
                 withAnimation {
                     messages.append(message)
+                    if index == conversation.count - 1 {
+                        animationCompleted = true // Set to true when last message is added
+                    }
                 }
             }
         }
     }
 }
 
+struct NextView: View {
+    var body: some View {
+        MixedContentGalleryView(contents: [
+            .image("Sunset-Zahid"),
+            .text("Pacifica Sunset in June."),
+            .image("Sutro-Tower"),
+            .text("A captivating story about Sutro Tower."),
+            .image("Waymo-burn"),
+            .text("Final thoughts on autonomous vehicles.")
+        ])
 
+    }
+}
 
 struct ContentView: View {
     @State private var sessionID: String?
@@ -178,6 +193,8 @@ struct ContentView: View {
     @State private var immersiveSpaceIsShown = false
     @State private var rotationAngle: Angle = Angle(degrees: 0)
     @State private var responseText: String = "Loading..."
+    @State private var showNextView = false
+    @State private var animationCompleted = false
 
     @Environment(\.openImmersiveSpace) var openImmersiveSpace
     @Environment(\.dismissImmersiveSpace) var dismissImmersiveSpace
@@ -192,36 +209,41 @@ struct ContentView: View {
                 
                 Divider().padding()
                 
-                AnimatedTextView()
+                AnimatedTextView(animationCompleted: $animationCompleted)
             
                 //ImageGalleryView(imageNames: ["Sunset-Zahid", "Sutro-Tower", "Waymo-burn"])
                 
-//                MixedContentGalleryView(contents: [
-//                    .image("Sunset-Zahid"),
-//                    .text("Pacifica Sunset in June."),
-//                    .image("Sutro-Tower"),
-//                    .text("A captivating story about Sutro Tower."),
-//                    .image("Waymo-burn"),
-//                    .text("Final thoughts on autonomous vehicles.")
-//                ])
-
                 //Divider().padding()
                 
                 //InteractivePanelView()
                 
                 Divider().padding()
                 
-//                Text(responseText)
-//                    .onAppear {
-//                        fetchData()
-//                    }.padding()
+                //Text(responseText)
+                //    .onAppear {
+                //        fetchData()
+                //    }.padding()
+                
+                if animationCompleted {
+                    Button("Continue") {
+                        showNextView = true
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(width: 280, height: 50)
+                    .cornerRadius(25)
+                    
+                    .fullScreenCover(isPresented: $showNextView) {
+                        NextView()
+                    }
+                }
                 
             }
         }
     }
     
     func fetchData() {
-        // Specify the URL of your endpoint
         guard let url = URL(string:"https://openai-hack-backend.onrender.com/conversation") else {
             print("Invalid URL")
             return
