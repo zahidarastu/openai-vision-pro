@@ -104,51 +104,130 @@ struct InteractivePanelView: View {
     }
 }
 
-struct AnimatedTextView: View {
-    @State private var messages: [(String, String)] = []
-    @State private var currentMessageIndex: Int = 0
-    var conversation: [(String, String)] = [
-        ("The Fates", "Hi Sharon!"),
-        ("Sharon Tan", "Hi"),
-        ("The Fates", "I heard you’re having a hard time making a big decision. What’s going on?"),
-        ("Sharon Tan", "I don’t know whether to move back to Singapore or stay in the Bay. My family all live in Singapore, but the Bay has so many amazing opportunities. What should I do?"),
-        ("The Fates", "You already know what is right for you, but I can help show you. Would you like to see?"),
-        ("Sharon Tan", "Yes, please."),
-    ]
-
-    let typingInterval: TimeInterval = 2.0 // Interval before typing starts
+struct AnimatedConversationView: View {
     @Binding var animationCompleted: Bool
+    @Binding var sessionID: String?
+    @State private var messages: [(String, String)] = [("The Fates", "Hi! What's on your mind?")]
+    @State private var userInput: String = ""
     let sendBubbleColor = Color.black.opacity(0.7)   // Dark bubble for sent messages
     let receiveBubbleColor = Color.gray.opacity(0.9) // Light bubble for received messages
 
+    
     var body: some View {
-        VStack {
-            ForEach(messages, id: \.1) { message in
-                HStack {
-                    if message.0 == "The Fates" {
-                        messageBubble(text: message.1, bubbleColor: receiveBubbleColor, textColor: .white)
-                            .frame(maxWidth: 400, alignment: .leading)
-                        Spacer()
-                    } else {
-                        Spacer()
-                        messageBubble(text: message.1, bubbleColor: sendBubbleColor, textColor: .white)
-                            .frame(maxWidth: 400, alignment: .trailing)
+         VStack {
+             // Message list in a scroll view
+             ScrollView {
+                 VStack {
+                     ForEach(messages, id: \.1) { message in
+                         HStack {
+                             if message.0 == "The Fates" {
+                                 messageBubble(text: message.1, bubbleColor: receiveBubbleColor, textColor: .white)
+                                     .frame(maxWidth: 300, alignment: .leading)
+                                 Spacer()
+                             } else {
+                                 Spacer()
+                                 messageBubble(text: message.1, bubbleColor: sendBubbleColor, textColor: .white)
+                                     .frame(maxWidth: 300, alignment: .trailing)
+                             }
+                         }
+                         .padding(.horizontal)
+                         .transition(.asymmetric(insertion: .scale, removal: .opacity))
+                     }
+                 }
+                 .padding(.bottom, 50) // Add padding to the bottom to make room for the input field
+             }
+
+             // Input field pinned at the bottom
+             HStack {
+                 TextField("Your response...", text: $userInput, onCommit: {
+                     DispatchQueue.main.async {
+                     // Trim the userInput to remove leading and trailing white spaces
+                     let trimmedInput = self.userInput.trimmingCharacters(in: .whitespacesAndNewlines)
+ 
+                     // Check if the trimmed input is not empty
+                     if !trimmedInput.isEmpty {
+                         addMessage(from: "User", content: trimmedInput)
+                         fetchData(message: trimmedInput)
+                         self.userInput = "" // Clear the input field after submission
+                     }
+                     else {
+                         self.userInput = ""
+                     }
+                 }
+                 })
+                 .foregroundColor(.white) // This changes the text color inside the TextField
+                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                 .frame(width: 200, alignment: .trailing)
+                 .padding()
+             }
+             .background(Color(UIColor.systemBackground)) // Match the color with the system background
+             .edgesIgnoringSafeArea(.bottom) // Ignore safe area to extend the background
+         }
+     }
+
+    struct ResponseItem: Decodable {
+        let id: String
+        let sessionID: String
+        let role: String
+        let contentType: String
+        let content: String
+    }
+
+    // Since your JSON is an array, you can decode it directly into an array of ResponseItem
+    typealias ResponseArray = [ResponseItem]
+    
+    private func fetchData(message: String) {
+        guard let url = URL(string: "https://openai-hack-backend.onrender.com/conversation") else {
+            print("Invalid URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 100
+        
+        if let sessionID = sessionID {
+            request.addValue(sessionID, forHTTPHeaderField: "sessionID")
+        }
+
+        let body: [String: Any] = ["message": message]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                let decoder = JSONDecoder()
+                // Convert from snake_case to camelCase
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                do {
+                    // Decode the JSON data into an array of ResponseItem
+                    let decodedResponse = try decoder.decode(ResponseArray.self, from: data)
+                    // Here we assume you want the content of the first item in the array
+                    let content = decodedResponse.first?.content ?? "No content"
+                    DispatchQueue.main.async {
+                        // Append the user's message and the parsed content to the messages array
+                        //self.sessionID = decodedResponse.first?.sessionID
+                        self.messages.append(("The Fates", content))
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        self.messages.append(("Error", "Failed to parse data: \(error.localizedDescription)"))
                     }
                 }
-                .padding(.horizontal)
-                .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .opacity))
+            } else if let error = error {
+                DispatchQueue.main.async {
+                    self.messages.append(("Error", "Failed to fetch data: \(error.localizedDescription)"))
+                }
             }
-        }
-        .onAppear {
-            addMessages()
-        }
+
+        }.resume()
     }
-    
+
+
     @ViewBuilder
     private func messageBubble(text: String, bubbleColor: Color, textColor: Color) -> some View {
         Text(text)
-            .padding(.horizontal)
-            .padding(.vertical, 10)
+            .padding()
             .background(bubbleColor)
             .foregroundColor(textColor)
             .cornerRadius(15)
@@ -157,24 +236,18 @@ struct AnimatedTextView: View {
                     .stroke(Color.gray, lineWidth: 0.5)
             )
     }
-    
-    func addMessages() {
-        for (index, message) in conversation.enumerated() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + typingInterval * Double(index)) {
-                withAnimation {
-                    messages.append(message)
-                    if index == conversation.count - 1 {
-                        animationCompleted = true // Set to true when last message is added
-                    }
-                }
-            }
+
+    private func addMessage(from sender: String, content: String) {
+        withAnimation {
+            messages.append((sender, content))
         }
     }
 }
 
+
 struct ContentView: View {
     @State private var sessionID: String?
-    @State private var userID: String = "sharon"
+    //@State private var userID: String = "sharon"
     @State private var showImmersiveSpace = false
     @State private var immersiveSpaceIsShown = false
     @State private var rotationAngle: Angle = Angle(degrees: 0)
@@ -188,14 +261,14 @@ struct ContentView: View {
     let timer = Timer.publish(every: 1/60, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        ScrollView {
             VStack {
                 
                 TitlePanelView().padding()
                 
                 Divider().padding()
                 
-                AnimatedTextView(animationCompleted: $animationCompleted)
+//                AnimatedTextView(animationCompleted: $animationCompleted)
+                AnimatedConversationView(animationCompleted: $animationCompleted, sessionID: $sessionID)
             
                 //ImageGalleryView(imageNames: ["Sunset-Zahid", "Sutro-Tower", "Waymo-burn"])
                 
@@ -224,57 +297,7 @@ struct ContentView: View {
                         GalleryView()
                     }
                 }
-                
-            }
         }
-    }
-    
-    func fetchData() {
-        guard let url = URL(string:"https://openai-hack-backend.onrender.com/conversation") else {
-            print("Invalid URL")
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 100
-        
-        // Add sessionID and userID to the request headers if they exist
-        if let sessionID = self.sessionID {
-            request.addValue(sessionID, forHTTPHeaderField: "sessionID")
-        }
-        request.addValue(userID, forHTTPHeaderField: "userID")
-        
-        let body: [String: Any] = ["message": "Should I got to San Francisco or New York?"]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
-
-        
-        // Perform the network request
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let response = response as? HTTPURLResponse {
-                // Check if the response contains a new sessionID and update it
-                if let newSessionID = response.allHeaderFields["sessionID"] as? String, self.sessionID == nil {
-                    DispatchQueue.main.async {
-                        self.sessionID = newSessionID
-                    }
-                }
-            }
-
-            if let data = data {
-                if let responseString = String(data: data, encoding: .utf8) {
-                    // Update the UI with the response
-                    DispatchQueue.main.async {
-                        self.responseText = responseString
-                    }
-                }
-            } else if let error = error {
-                // Handle any errors
-                DispatchQueue.main.async {
-                    self.responseText = "Error fetching data: \(error.localizedDescription)"
-                }
-            }
-        }.resume()
     }
 }
 

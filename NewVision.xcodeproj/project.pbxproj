@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3196E5AD2B9486D300F1A549 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3196E5AC2B9486D300F1A549 /* GalleryView.swift */; };
 		31B2A2252B94443D00F0A78C /* StartSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B2A2242B94443D00F0A78C /* StartSessionView.swift */; };
 		31DB83D32B930B9900CF25D1 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; productRef = 31DB83D22B930B9900CF25D1 /* RealityKitContent */; };
 		31DB83D52B930B9900CF25D1 /* NewVisionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DB83D42B930B9900CF25D1 /* NewVisionApp.swift */; };
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3196E5AC2B9486D300F1A549 /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
 		31B2A2242B94443D00F0A78C /* StartSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartSessionView.swift; sourceTree = "<group>"; };
 		31DB83CD2B930B9900CF25D1 /* NewVision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NewVision.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31DB83D12B930B9900CF25D1 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 				31DB83D62B930B9900CF25D1 /* ContentView.swift */,
 				31DB83D82B930B9900CF25D1 /* ImmersiveView.swift */,
 				31B2A2242B94443D00F0A78C /* StartSessionView.swift */,
+				3196E5AC2B9486D300F1A549 /* GalleryView.swift */,
 				31DB83DA2B930B9B00CF25D1 /* Assets.xcassets */,
 				31DB83DF2B930B9B00CF25D1 /* Info.plist */,
 				31DB83DC2B930B9B00CF25D1 /* Preview Content */,
@@ -224,6 +227,7 @@
 				31DB83D52B930B9900CF25D1 /* NewVisionApp.swift in Sources */,
 				31B2A2252B94443D00F0A78C /* StartSessionView.swift in Sources */,
 				31DB83D92B930B9900CF25D1 /* ImmersiveView.swift in Sources */,
+				3196E5AD2B9486D300F1A549 /* GalleryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
