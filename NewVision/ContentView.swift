@@ -103,6 +103,71 @@ struct InteractivePanelView: View {
     }
 }
 
+struct AnimatedTextView: View {
+    @State private var messages: [(String, String)] = []
+    @State private var currentMessageIndex: Int = 0
+    var conversation: [(String, String)] = [
+        ("The Fates", "Hi Sharon!"),
+        ("Sharon Tan", "Hi"),
+        ("The Fates", "I heard you’re having a hard time making a big decision. What’s going on?"),
+        ("Sharon Tan", "I don’t know whether to move back to Singapore or stay in the Bay. My family all live in Singapore, but the Bay has so many amazing opportunities. What should I do?"),
+        ("The Fates", "You already know what is right for you, but I can help show you. Would you like to see?"),
+        ("Sharon Tan", "Yes, please."),
+    ]
+
+    let typingInterval: TimeInterval = 3.0 // Interval before typing starts
+    let sendBubbleColor = Color.black.opacity(0.7)   // Dark bubble for sent messages
+    let receiveBubbleColor = Color.gray.opacity(0.9) // Light bubble for received messages
+
+    var body: some View {
+        VStack {
+            ForEach(messages, id: \.1) { message in
+                HStack {
+                    if message.0 == "The Fates" {
+                        messageBubble(text: message.1, bubbleColor: receiveBubbleColor, textColor: .white)
+                            .frame(maxWidth: 400, alignment: .leading)
+                        Spacer()
+                    } else {
+                        Spacer()
+                        messageBubble(text: message.1, bubbleColor: sendBubbleColor, textColor: .white)
+                            .frame(maxWidth: 400, alignment: .trailing)
+                    }
+                }
+                .padding(.horizontal)
+                .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .opacity))
+            }
+        }
+        .onAppear {
+            addMessages()
+        }
+    }
+    
+    @ViewBuilder
+    private func messageBubble(text: String, bubbleColor: Color, textColor: Color) -> some View {
+        Text(text)
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            .background(bubbleColor)
+            .foregroundColor(textColor)
+            .cornerRadius(15)
+            .overlay(
+                RoundedRectangle(cornerRadius: 15)
+                    .stroke(Color.gray, lineWidth: 0.5)
+            )
+    }
+    
+    func addMessages() {
+        for (index, message) in conversation.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + typingInterval * Double(index)) {
+                withAnimation {
+                    messages.append(message)
+                }
+            }
+        }
+    }
+}
+
+
 
 struct ContentView: View {
     @State private var sessionID: String?
@@ -125,27 +190,30 @@ struct ContentView: View {
                 
                 Divider().padding()
                 
+                AnimatedTextView()
+                
                 //ImagePanelView(imageName: "Sunset-Zahid")
                 //ImageGalleryView(imageNames: ["Sunset-Zahid", "Sutro-Tower", "Waymo-burn"])
-                MixedContentGalleryView(contents: [
-                    .image("Sunset-Zahid"),
-                    .text("Pacifica Sunset in June."),
-                    .image("Sutro-Tower"),
-                    .text("A captivating story about Sutro Tower."),
-                    .image("Waymo-burn"),
-                    .text("Final thoughts on autonomous vehicles.")
-                ])
+                
+//                MixedContentGalleryView(contents: [
+//                    .image("Sunset-Zahid"),
+//                    .text("Pacifica Sunset in June."),
+//                    .image("Sutro-Tower"),
+//                    .text("A captivating story about Sutro Tower."),
+//                    .image("Waymo-burn"),
+//                    .text("Final thoughts on autonomous vehicles.")
+//                ])
 
                 //Divider().padding()
                 
-                InteractivePanelView()
+                //InteractivePanelView()
                 
                 Divider().padding()
                 
-                Text(responseText)
-                    .onAppear {
-                        fetchData()
-                    }.padding()
+//                Text(responseText)
+//                    .onAppear {
+//                        fetchData()
+//                    }.padding()
                 
             }
         }
